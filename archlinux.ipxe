@@ -1,0 +1,62 @@
+#!ipxe
+
+# Arch Linux Operating System
+# http://www.archlinux.org
+
+goto ${menu} ||
+
+:archlinux
+set os Arch Linux
+set arch_version 2019.05.02
+clear arch_option
+menu Arch Linux
+item --gap Default
+item default ${arch_version}
+item set_params [ extra_params: ${extra_params} ]
+item --gap Custom
+item acpi_osi ${arch_version} with acpi_osi=! acpi_osi="Windows 2009"
+item nonouveau ${arch_version} with nouveau.modeset=0
+choose arch_option || goto archlinux_exit
+goto ${arch_option}
+
+:default
+goto boot
+
+:set_params
+echo -n your params: ${} && read extra_params
+echo extra_params is set to ${extra_params}
+prompt Press any key to return to menu...
+goto ${menu}
+
+:acpi_osi
+set extra_params acpi_osi=! acpi_osi="Windows 2009"
+goto boot
+
+:nonouveau
+set extra_params nouveau.modeset=0
+goto boot
+
+:boot
+imgfree
+echo Boot with ${extra_params}...
+set params initrd=archiso.img archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch verify=y ip=dhcp net.ifnames=0 ${console}
+kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz ${params} ${extra_params} initrd=intel_ucode.img initrd=amd_ucode.img initrd=archiso.img
+initrd http://${boot_domain}/archlinux/arch/boot/intel_ucode.img
+initrd http://${boot_domain}/archlinux/arch/boot/amd_ucode.img
+initrd http://${boot_domain}/archlinux/arch/boot/x86_64/archiso.img
+
+iseq ${img_sigs_enabled} true && goto verify_sigs || goto skip_sigs
+:verify_sigs
+echo
+echo Checking signatures...
+imgverify vmlinuz ${sigs}${dir}/x86_64/vmlinuz.sig || goto error
+imgverify archiso.img ${sigs}${dir}/x86_64/archiso.img.sig || goto error
+echo Signatures verified!
+echo
+:skip_sigs
+boot
+goto archlinux_exit
+
+:archlinux_exit
+clear menu
+exit 0

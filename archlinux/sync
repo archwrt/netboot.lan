@@ -1,0 +1,2 @@
+#!/bin/bash
+rsync -rv "rsync://mirrors.tuna.tsinghua.edu.cn/archlinux/iso/latest/arch" .
