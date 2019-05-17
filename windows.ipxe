@@ -3,7 +3,8 @@
 # Microsoft Windows
 # https://www.microsoft.com
 
-set win_arch x64
+iseq ${arch} x86_64 && set win_arch x64 ||
+iseq ${arch} i386 && set win_arch x86 ||
 goto ${menu} ||
 
 :windows
@@ -41,7 +42,8 @@ goto windows
 isset http://${boot_domain}/${win_dir} && goto boot || echo URL not set... && goto dir_set
 
 :boot
-kernel http://${boot_domain}/wimboot
+iseq ${win_arch} x64 && kernel http://${boot_domain}/wimboot ||
+iseq ${win_arch} x86 && kernel http://${boot_domain}/wimboot.i386 ||
 initrd http://${boot_domain}/${win_dir}/${win_arch}/bootmgr bootmgr
 initrd http://${boot_domain}/${win_dir}/${win_arch}/boot/bcd bcd
 initrd http://${boot_domain}/${win_dir}/${win_arch}/boot/boot.sdi boot.sdi
