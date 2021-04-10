@@ -7,7 +7,7 @@ goto ${menu} ||
 
 :archlinux
 set os Arch Linux
-set arch_version 2019.05.02
+set arch_version 2021.04.01
 clear arch_option
 menu Arch Linux
 item --gap Default
@@ -39,18 +39,18 @@ goto boot
 :boot
 imgfree
 echo Boot with ${extra_params}...
-set params initrd=archiso.img archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch verify=y ip=dhcp net.ifnames=0 ${console}
-kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz ${params} ${extra_params} initrd=intel_ucode.img initrd=amd_ucode.img initrd=archiso.img
+set params initrd=initramfs-linux.img archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch verify=y ip=dhcp net.ifnames=0 ${console}
+kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz-linux ${params} ${extra_params} initrd=intel_ucode.img initrd=amd_ucode.img initrd=initramfs-linux.img
 initrd http://${boot_domain}/archlinux/arch/boot/intel_ucode.img
 initrd http://${boot_domain}/archlinux/arch/boot/amd_ucode.img
-initrd http://${boot_domain}/archlinux/arch/boot/x86_64/archiso.img
+initrd http://${boot_domain}/archlinux/arch/boot/x86_64/initramfs-linux.img
 
 iseq ${img_sigs_enabled} true && goto verify_sigs || goto skip_sigs
 :verify_sigs
 echo
 echo Checking signatures...
-imgverify vmlinuz ${sigs}${dir}/x86_64/vmlinuz.sig || goto error
-imgverify archiso.img ${sigs}${dir}/x86_64/archiso.img.sig || goto error
+imgverify vmlinuz-linux ${sigs}${dir}/x86_64/vmlinuz-linux.sig || goto error
+imgverify initramfs-linux.img ${sigs}${dir}/x86_64/initramfs-linux.img.sig || goto error
 echo Signatures verified!
 echo
 :skip_sigs
