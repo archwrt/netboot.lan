@@ -7,7 +7,7 @@ goto ${menu} ||
 
 :archlinux
 set os Arch Linux
-set arch_version 2021.04.01
+set arch_version 2021.12.01
 clear arch_option
 menu Arch Linux
 item --gap Default
@@ -40,9 +40,9 @@ goto boot
 imgfree
 echo Boot with ${extra_params}...
 set params initrd=initramfs-linux.img archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch verify=y ip=dhcp net.ifnames=0 ${console}
-kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz-linux ${params} ${extra_params} initrd=intel_ucode.img initrd=amd_ucode.img initrd=initramfs-linux.img
-initrd http://${boot_domain}/archlinux/arch/boot/intel_ucode.img
-initrd http://${boot_domain}/archlinux/arch/boot/amd_ucode.img
+kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz-linux ${params} ${extra_params} initrd=intel-ucode.img initrd=amd-ucode.img initrd=initramfs-linux.img
+initrd http://${boot_domain}/archlinux/arch/boot/intel-ucode.img
+initrd http://${boot_domain}/archlinux/arch/boot/amd-ucode.img
 initrd http://${boot_domain}/archlinux/arch/boot/x86_64/initramfs-linux.img
 
 iseq ${img_sigs_enabled} true && goto verify_sigs || goto skip_sigs
