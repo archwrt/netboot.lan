@@ -3,11 +3,24 @@
 # Arch Linux Operating System
 # http://www.archlinux.org
 
+isset ${dhcp-server} || goto static_ip
+set ipparam BOOTIF=${netX/mac} ip=dhcp
+set real_archlinux_mirror ${archlinux_mirror}
+goto goto_menu
+
+:static_ip
+# Arch Linux cannot use DNS if booted with a static IP
+# See https://bugs.archlinux.org/task/63174
+# Remove this hack when the above bug is properly resolved
+nslookup real_archlinux_mirror ${archlinux_mirror}
+set ipparam BOOTIF=${netX/mac} ip=${ip}::${gateway}:${netmask}
+
+:goto_menu
 goto ${menu} ||
 
 :archlinux
 set os Arch Linux
-set arch_version 2021.12.01
+set arch_version 2023.09.01
 clear arch_option
 menu Arch Linux
 item --gap Default
@@ -18,7 +31,6 @@ item acpi_osi ${arch_version} with acpi_osi=! acpi_osi="Windows 2009"
 item nonouveau ${arch_version} with nouveau.modeset=0
 choose arch_option || goto archlinux_exit
 goto ${arch_option}
-
 :default
 goto boot
 
@@ -39,7 +51,7 @@ goto boot
 :boot
 imgfree
 echo Boot with ${extra_params}...
-set params initrd=initramfs-linux.img archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch verify=y ip=dhcp net.ifnames=0 ${console}
+set params archiso_http_srv=http://${boot_domain}/archlinux/ archisobasedir=arch cms_verify=y ${ipparam} net.ifnames=0 initrd=initrd.magic ${console}
 kernel http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz-linux ${params} ${extra_params} initrd=intel-ucode.img initrd=amd-ucode.img initrd=initramfs-linux.img
 initrd http://${boot_domain}/archlinux/arch/boot/intel-ucode.img
 initrd http://${boot_domain}/archlinux/arch/boot/amd-ucode.img
@@ -49,8 +61,10 @@ iseq ${img_sigs_enabled} true && goto verify_sigs || goto skip_sigs
 :verify_sigs
 echo
 echo Checking signatures...
-imgverify vmlinuz-linux ${sigs}${dir}/x86_64/vmlinuz-linux.sig || goto error
-imgverify initramfs-linux.img ${sigs}${dir}/x86_64/initramfs-linux.img.sig || goto error
+imgverify vmlinuz-linux http://${boot_domain}/archlinux/arch/boot/x86_64/vmlinuz-linux.ipxe.sig || goto error
+imgverify intel-ucode.img http://${boot_domain}/archlinux/arch/boot/intel-ucode.img.ipxe.sig || goto error
+imgverify amd-ucode.img http://${boot_domain}/archlinux/arch/boot/amd-ucode.img.ipxe.sig || goto error
+imgverify initramfs-linux.img http://${boot_domain}/archlinux/arch/boot/x86_64/initramfs-linux.img.ipxe.sig || goto error
 echo Signatures verified!
 echo
 :skip_sigs
